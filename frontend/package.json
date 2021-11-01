@@ -1,0 +1,80 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "homepage": "./",
+  "private": true,
+  "dependencies": {
+    "@metamask/detect-provider": "^1.2.0",
+    "@openzeppelin/contracts": "^3.4.1",
+    "@fortawesome/react-fontawesome": "^0.1.14",
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-brands-svg-icons": "^5.15.3",
+    "axios": "^0.21.1",
+    "bootstrap": "^4.6.0",
+    "dotenv": "^8.2.0",
+    "ethers": "^5.0.32",
+    "immutability-helper": "^3.1.1",
+    "ipfs-http-client": "^49.0.4",
+    "it-all": "^1.0.5",
+    "konva": "^7.2.5",
+    "react": "^17.0.2",
+    "react-bootstrap": "^1.6.1",
+    "react-draggable": "^4.4.3",
+    "react-dom": "^17.0.2",
+    "react-konva": "^17.0.1-3",
+    "react-resize-detector": "^6.6.4",
+    "react-router-bootstrap": "^0.25.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.3",
+    "react-toastify": "7.0.3",
+    "typescript": "^4.2.3",
+    "uint8arrays": "^2.1.3",
+    "web3modal": "^1.9.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "start:test": "env-cmd -f .env.test react-scripts start",
+    "start:production": "env-cmd -f .env.production react-scripts start",
+    "build": "react-scripts build",
+    "build:test": "env-cmd -f .env.test react-scripts build && rm -r -f test_build && mv build test_build",
+    "build:production": "env-cmd -f .env.production react-scripts build && rm -r -f production_build && mv build production_build",
+    "build:mumbai": "env-cmd -f .env.mumbai react-scripts build && rm -r -f mumbai_build && mv build mumbai_build",
+    "build:polygon": "env-cmd -f .env.polygon react-scripts build && rm -r -f polygon_build && mv build polygon_build",
+    "deploy:test": "set NODE_ENV=test&& tsc --build scripts/tsconfig.json && node scripts/dist/deploy.js test_build",
+    "deploy:production": "set NODE_ENV=production&& tsc --build scripts/tsconfig.json && node scripts/dist/deploy.js production_build",
+    "deploy:mumbai": "set NODE_ENV=mumbai&& tsc --build scripts/tsconfig.json && node scripts/dist/deploy.js mumbai_build",
+    "deploy:polygon": "set NODE_ENV=polygon&& tsc --build scripts/tsconfig.json && node scripts/dist/deploy.js polygon_build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/user-event": "^12.8.3",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^14.14.33",
+    "@types/pica": "^5.1.2",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.2",
+    "@types/react-router-bootstrap": "^0.24.5",
+    "@types/react-router-dom": "^5.1.7",
+    "env-cmd": "10.1.0",
+    "dotenv": "^8.2.0",
+    "@pinata/sdk": "^1.1.20"
+  }
+}
