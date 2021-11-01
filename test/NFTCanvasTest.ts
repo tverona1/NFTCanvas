@@ -759,7 +759,7 @@ describe("NFTCanvas contract", function () {
 
         it("Send by owner address to owner should succeed", async function () {
             let newPriceRanges = [10, 20, 50];
-            let newPricePerRange = [100000, 10, 100];
+            let newPricePerRange = [10000000, 10, 100];
             let maxBlocksPerPurchasePerRange = [10, 20, 50];
             await nftCanvasToken.setPriceRanges(newPriceRanges, newPricePerRange, maxBlocksPerPurchasePerRange);
 
