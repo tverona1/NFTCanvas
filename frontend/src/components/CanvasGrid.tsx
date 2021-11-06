@@ -224,6 +224,64 @@ export default class CanvasGrid extends React.Component<Props, State> {
   }
 
   /**
+   * Handle start of canvas move (drag)
+   * 
+   * @param clientX client X coordinate
+   * @param clientY client Y coordinate
+   */
+  private onMoveStart(clientX: number, clientY: number) {
+    if (!this.state.draggingSelection && this.scrollContainerRef?.current != null && this.isScrollable()) {
+      this.dragToScrollState.scrollLeft = this.scrollContainerRef?.current.scrollLeft;
+      this.dragToScrollState.scrollTop = this.scrollContainerRef?.current.scrollTop;
+      this.dragToScrollState.clientX = clientX;
+      this.dragToScrollState.clientY = clientY;
+      this.dragToScrollState.isPressed = true;
+    }
+  }
+
+  /**
+   * Handle canvsa move (drag)
+   * 
+   * @param clientX client X coordinate
+   * @param clientY client Y coordinate
+   */
+  private onMove(clientX: number, clientY: number) {
+    if (!this.state.draggingSelection && this.dragToScrollState.isPressed && this.scrollContainerRef?.current != null) {
+        if (!this.dragToScrollState.isScrolling) {
+        if ((Math.abs(clientX - this.dragToScrollState.clientX) > this.dragToScrollState.activationDistance) || (Math.abs(clientY - this.dragToScrollState.clientY) > this.dragToScrollState.activationDistance)) {
+          this.dragToScrollState.clientX = clientX;
+          this.dragToScrollState.clientY = clientY;
+          this.dragToScrollState.isScrolling = true;
+          this.setState({ cursorStyle: "grab" });
+          this.forceUpdate();
+        }
+      } else {
+        this.scrollContainerRef.current.scrollLeft -= clientX - this.dragToScrollState.clientX;
+        this.scrollContainerRef.current.scrollTop -= clientY - this.dragToScrollState.clientY;
+        this.dragToScrollState.clientX = clientX;
+        this.dragToScrollState.clientY = clientY;
+        this.dragToScrollState.scrollLeft = this.scrollContainerRef?.current.scrollLeft;
+        this.dragToScrollState.scrollTop = this.scrollContainerRef?.current.scrollTop;
+      }
+    }
+  }
+
+  /**
+   * Handle canvas move end (drag)
+   */
+  private onMoveEnd() {
+    if (this.dragToScrollState.isPressed) {
+      if (this.dragToScrollState.isScrolling) {
+        this.setState({ cursorStyle: "auto" });
+      }
+      this.dragToScrollState.isScrolling = false;
+      this.dragToScrollState.isPressed = false;
+
+      this.forceUpdate();
+    }
+  }
+
+  /**
    * Scale the canvas grid
    * 
    * @param scale The scale factor
@@ -333,15 +391,8 @@ export default class CanvasGrid extends React.Component<Props, State> {
    * @param e MouseEvent
    */
   onMouseDown = (e: React.MouseEvent) => {
-    if (!this.state.draggingSelection && this.scrollContainerRef?.current != null && this.isScrollable()) {
-      e.preventDefault();
-
-      this.dragToScrollState.scrollLeft = this.scrollContainerRef?.current.scrollLeft;
-      this.dragToScrollState.scrollTop = this.scrollContainerRef?.current.scrollTop;
-      this.dragToScrollState.clientX = e.clientX;
-      this.dragToScrollState.clientY = e.clientY;
-      this.dragToScrollState.isPressed = true;
-    }
+    e.preventDefault();
+    this.onMoveStart(e.clientX, e.clientY);
   };
 
   /**
@@ -350,15 +401,8 @@ export default class CanvasGrid extends React.Component<Props, State> {
    * @param e MouseEvent
    */
   onMouseUp = (e: React.MouseEvent) => {
-    if (this.dragToScrollState.isPressed) {
-      e.preventDefault();
-      if (this.dragToScrollState.isScrolling) {
-        this.setState({ cursorStyle: "auto" });
-      }
-      this.dragToScrollState.isScrolling = false;
-      this.dragToScrollState.isPressed = false;
-      this.forceUpdate();
-    }
+    e.preventDefault();
+    this.onMoveEnd();
   };
 
   /**
@@ -367,29 +411,8 @@ export default class CanvasGrid extends React.Component<Props, State> {
    * @param e MouseEvent
    */
   onMouseMove = (e: React.MouseEvent) => {
-    if (!this.state.draggingSelection && this.dragToScrollState.isPressed && this.scrollContainerRef?.current != null) {
-      e.preventDefault();
-
-      const newClientX = e.clientX;
-      const newClientY = e.clientY;
-
-      if (!this.dragToScrollState.isScrolling) {
-        if ((Math.abs(newClientX - this.dragToScrollState.clientX) > this.dragToScrollState.activationDistance) || (Math.abs(newClientY - this.dragToScrollState.clientY) > this.dragToScrollState.activationDistance)) {
-          this.dragToScrollState.clientX = newClientX;
-          this.dragToScrollState.clientY = newClientY;
-          this.dragToScrollState.isScrolling = true;
-          this.setState({ cursorStyle: "grab" });
-          this.forceUpdate();
-        }
-      } else {
-        this.scrollContainerRef.current.scrollLeft -= newClientX - this.dragToScrollState.clientX;
-        this.scrollContainerRef.current.scrollTop -= newClientY - this.dragToScrollState.clientY;
-        this.dragToScrollState.clientX = newClientX
-        this.dragToScrollState.clientY = newClientY
-        this.dragToScrollState.scrollLeft = this.scrollContainerRef?.current.scrollLeft
-        this.dragToScrollState.scrollTop = this.scrollContainerRef?.current.scrollTop
-      }
-    }
+    e.preventDefault();
+    this.onMove(e.clientX, e.clientY);
   };
 
   /**
@@ -410,59 +433,87 @@ export default class CanvasGrid extends React.Component<Props, State> {
     };
   }
 
-  private onTouchMove = (e: React.TouchEvent) => {
+  /**
+   * Handle touch pinch-to-zoom
+   * 
+   * @param touch1 touch object 1
+   * @param touch2 touch object 2
+   * @returns 
+   */
+  private touchZoom(touch1: React.Touch, touch2: React.Touch) {
     if (this.stage == null) {
       return;
     }
 
-    if (e.touches.length < 2) {
+    // If the stage was under Konva's drag & drop
+    // we need to stop it, and implement our own pan logic with two pointers
+    if (this.stage.isDragging()) {
+      this.stage.stopDrag();
+    }
+
+    var p1 = {
+      x: touch1.clientX,
+      y: touch1.clientY,
+    };
+
+    var p2 = {
+      x: touch2.clientX,
+      y: touch2.clientY,
+    };
+
+    if (!this.lastTouchCenter) {
+      this.lastTouchCenter = this.getCenter(p1, p2);
       return;
     }
 
-    var touch1 = e.touches[0];
-    var touch2 = e.touches[1];
+    var dist = this.getDistance(p1, p2);
+    if (!this.lastTouchDist) {
+      this.lastTouchDist = dist;
+    }
 
-    if (touch1 && touch2) {
+    var scale = this.stage.scaleX() * (dist / this.lastTouchDist);
+
+    this.setScale(scale);
+  }
+
+  /**
+   * Handle on touch start event
+   * 
+   * @param e touch event
+   */
+  private onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      this.onMoveStart(touch.clientX, touch.clientY);
+    } else {
       e.preventDefault();
-
-      // If the stage was under Konva's drag & drop
-      // we need to stop it, and implement our own pan logic with two pointers
-      if (this.stage.isDragging()) {
-        this.stage.stopDrag();
-      }
-
-      var p1 = {
-        x: touch1.clientX,
-        y: touch1.clientY,
-      };
-
-      var p2 = {
-        x: touch2.clientX,
-        y: touch2.clientY,
-      };
-
-      if (!this.lastTouchCenter) {
-        this.lastTouchCenter = this.getCenter(p1, p2);
-        return;
-      }
-
-      var dist = this.getDistance(p1, p2);
-      if (!this.lastTouchDist) {
-        this.lastTouchDist = dist;
-      }
-
-      var scale = this.stage.scaleX() * (dist / this.lastTouchDist);
-
-      this.setScale(scale);
     }
   }
 
-  private onTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
+  /**
+   * Handle on touch move event
+   * 
+   * @param e touch event
+   */
+  private onTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      this.onMove(touch.clientX, touch.clientY);
+    } else if (e.touches.length >= 2) {
+      e.preventDefault();
+      var touch1 = e.touches[0];
+      var touch2 = e.touches[1];
+      this.touchZoom(touch1, touch2);
+    }
   }
 
+  /**
+   * Handle on touch end event
+   * 
+   * @param e touch event
+   */
   private onTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
+    this.onMoveEnd();
     this.lastTouchDist = 0;
     this.lastTouchCenter = undefined;
   }

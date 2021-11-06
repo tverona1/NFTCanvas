@@ -126,11 +126,13 @@ export default class AreaDataRect extends React.Component<Props> {
    * Invoked then clicking on existing area
    */
   private onClick() {
+    console.log('onclick 1')
     if (this.props.isDragging) {
       // If canvas is being dragged, skip
       return;
     }
 
+    console.log('onclick 2')
     if (this.props.isPurchaseMode && this.props.isOwned) {
       // If in purchase mode & area is owned by wallet, invoke callback
       this.props.onSelectedOwnedArea(this.props.areaData);
@@ -161,6 +163,7 @@ export default class AreaDataRect extends React.Component<Props> {
         height={height}
         stroke="#ddd"
         onClick={() => this.onClick()}
+        onTap={() => this.onClick()}
         onMouseMove={this.props.onMouseMove}
         onMouseOut={this.props.onMouseOut}
         ref={node => {

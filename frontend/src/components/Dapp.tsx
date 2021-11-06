@@ -11,19 +11,19 @@ import { NFTCanvas__factory as NFTCanvas__factoryDev } from "../contracts-genera
 import { NFTCanvas as NFTCanvasDev } from "../contracts-generated/typechain/NFTCanvas";
 
 // Rinkeby test network contract
-import { default as contractAddressRinkeby } from "../contracts-generated-rinkeby/contract-address.json";
-import { NFTCanvas__factory as NFTCanvas__factoryRinkeby } from "../contracts-generated-rinkeby/typechain/factories/NFTCanvas__factory";
-import { NFTCanvas as NFTCanvasRinkeby } from "../contracts-generated-rinkeby/typechain/NFTCanvas";
+//import { default as contractAddressRinkeby } from "../contracts-generated-rinkeby/contract-address.json";
+//import { NFTCanvas__factory as NFTCanvas__factoryRinkeby } from "../contracts-generated-rinkeby/typechain/factories/NFTCanvas__factory";
+//import { NFTCanvas as NFTCanvasRinkeby } from "../contracts-generated-rinkeby/typechain/NFTCanvas";
 
 // Mainnet contract
-import { default as contractAddressMainnet } from "../contracts-generated-mainnet/contract-address.json";
-import { NFTCanvas__factory as NFTCanvas__factoryMainnet } from "../contracts-generated-mainnet/typechain/factories/NFTCanvas__factory";
-import { NFTCanvas as NFTCanvasMainnet } from "../contracts-generated-mainnet/typechain/NFTCanvas";
+//import { default as contractAddressMainnet } from "../contracts-generated-mainnet/contract-address.json";
+//import { NFTCanvas__factory as NFTCanvas__factoryMainnet } from "../contracts-generated-mainnet/typechain/factories/NFTCanvas__factory";
+//import { NFTCanvas as NFTCanvasMainnet } from "../contracts-generated-mainnet/typechain/NFTCanvas";
 
 // Mumbai contract
-import { default as contractAddressMumbai } from "../contracts-generated-mumbai/contract-address.json";
-import { NFTCanvas__factory as NFTCanvas__factoryMumbai } from "../contracts-generated-mumbai/typechain/factories/NFTCanvas__factory";
-import { NFTCanvas as NFTCanvasMumbai } from "../contracts-generated-mumbai/typechain/NFTCanvas";
+//import { default as contractAddressMumbai } from "../contracts-generated-mumbai/contract-address.json";
+//import { NFTCanvas__factory as NFTCanvas__factoryMumbai } from "../contracts-generated-mumbai/typechain/factories/NFTCanvas__factory";
+//import { NFTCanvas as NFTCanvasMumbai } from "../contracts-generated-mumbai/typechain/NFTCanvas";
 
 // Polygon contract
 import { default as contractAddressPolygon } from "../contracts-generated-polygon/contract-address.json";
@@ -59,23 +59,32 @@ const POLL_INTERVAL_CANVAS_CACHE = 60 * 1000;
 const CHAIN_ID = parseInt(process.env.REACT_APP_CHAIN_ID ?? "31337");
 
 // Initialize Contract info depending on environment
-var contractAddress = contractAddressDev;
-var NFTCanvas__factory: typeof NFTCanvas__factoryDev | typeof NFTCanvas__factoryRinkeby | typeof NFTCanvas__factoryMainnet | typeof NFTCanvas__factoryMumbai | typeof NFTCanvas__factoryPolygon = NFTCanvas__factoryDev;
-type NFTCanvas = NFTCanvasDev | NFTCanvasRinkeby | NFTCanvasMainnet | NFTCanvasMumbai | NFTCanvasPolygon;
+var contractAddress = contractAddressPolygon;
+//var NFTCanvas__factory: typeof NFTCanvas__factoryDev | typeof NFTCanvas__factoryRinkeby | typeof NFTCanvas__factoryMainnet | typeof NFTCanvas__factoryMumbai | typeof NFTCanvas__factoryPolygon = NFTCanvas__factoryDev;
+var NFTCanvas__factory: typeof NFTCanvas__factoryDev | typeof NFTCanvas__factoryPolygon = NFTCanvas__factoryPolygon;
+//type NFTCanvas = NFTCanvasDev | NFTCanvasRinkeby | NFTCanvasMainnet | NFTCanvasMumbai | NFTCanvasPolygon;
+type NFTCanvas = NFTCanvasDev | NFTCanvasPolygon;
 
 switch (process.env.REACT_APP_ENV) {
+  case "development":
+    contractAddress = contractAddressDev;
+    NFTCanvas__factory = NFTCanvas__factoryDev;
+    break;
   case "production":
-    contractAddress = contractAddressMainnet;
-    NFTCanvas__factory = NFTCanvas__factoryMainnet;
-    break;
+    //contractAddress = contractAddressMainnet;
+    //NFTCanvas__factory = NFTCanvas__factoryMainnet;
+    //break;
+    throw new Error(`Uncomment above to support ${process.env.REACT_APP_ENV}`);
   case "test":
-    contractAddress = contractAddressRinkeby;
-    NFTCanvas__factory = NFTCanvas__factoryRinkeby;
-    break;
+    //contractAddress = contractAddressRinkeby;
+    //NFTCanvas__factory = NFTCanvas__factoryRinkeby;
+    //break;
+    throw new Error(`Uncomment above to support ${process.env.REACT_APP_ENV}`);
   case "mumbai":
-    contractAddress = contractAddressMumbai;
-    NFTCanvas__factory = NFTCanvas__factoryMumbai;
-    break;
+    //contractAddress = contractAddressMumbai;
+    //NFTCanvas__factory = NFTCanvas__factoryMumbai;
+    //break;
+    throw new Error(`Uncomment above to support ${process.env.REACT_APP_ENV}`);
   case "polygon":
     contractAddress = contractAddressPolygon;
     NFTCanvas__factory = NFTCanvas__factoryPolygon;
@@ -517,7 +526,7 @@ export default class Dapp extends React.Component<Props, State> {
    */
   private async updateCurrentPriceUSMicros() {
     const priceUSMicros = await this.nftCanvas.getCurrentPriceUSMicros();
-    console.log(`Current price: ${priceUSMicros / 10000} cents`);
+    console.log(`Current price: ${priceUSMicros.div(10000)} cents`);
     this.setState({ priceUSMicros: priceUSMicros });
   }
 

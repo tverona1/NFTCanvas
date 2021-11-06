@@ -7,19 +7,19 @@ import { NFTCanvas__factory as NFTCanvas__factoryDev } from "./contracts-generat
 import { NFTCanvas as NFTCanvasDev } from "./contracts-generated/typechain/NFTCanvas";
 
 // Rinkeby test network contract
-import { default as contractAddressRinkeby } from "./contracts-generated-rinkeby/contract-address.json";
-import { NFTCanvas__factory as NFTCanvas__factoryRinkeby } from "./contracts-generated-rinkeby/typechain/factories/NFTCanvas__factory";
-import { NFTCanvas as NFTCanvasRinkeby } from "./contracts-generated-rinkeby/typechain/NFTCanvas";
+//import { default as contractAddressRinkeby } from "./contracts-generated-rinkeby/contract-address.json";
+//import { NFTCanvas__factory as NFTCanvas__factoryRinkeby } from "./contracts-generated-rinkeby/typechain/factories/NFTCanvas__factory";
+//import { NFTCanvas as NFTCanvasRinkeby } from "./contracts-generated-rinkeby/typechain/NFTCanvas";
 
 // Mainnet contract
-import { default as contractAddressMainnet } from "./contracts-generated-mainnet/contract-address.json";
-import { NFTCanvas__factory as NFTCanvas__factoryMainnet } from "./contracts-generated-mainnet/typechain/factories/NFTCanvas__factory";
-import { NFTCanvas as NFTCanvasMainnet } from "./contracts-generated-mainnet/typechain/NFTCanvas";
+//import { default as contractAddressMainnet } from "./contracts-generated-mainnet/contract-address.json";
+//import { NFTCanvas__factory as NFTCanvas__factoryMainnet } from "./contracts-generated-mainnet/typechain/factories/NFTCanvas__factory";
+//import { NFTCanvas as NFTCanvasMainnet } from "./contracts-generated-mainnet/typechain/NFTCanvas";
 
 // Mumbai contract
-import { default as contractAddressMumbai } from "./contracts-generated-mumbai/contract-address.json";
-import { NFTCanvas__factory as NFTCanvas__factoryMumbai } from "./contracts-generated-mumbai/typechain/factories/NFTCanvas__factory";
-import { NFTCanvas as NFTCanvasMumbai } from "./contracts-generated-mumbai/typechain/NFTCanvas";
+//import { default as contractAddressMumbai } from "./contracts-generated-mumbai/contract-address.json";
+//import { NFTCanvas__factory as NFTCanvas__factoryMumbai } from "./contracts-generated-mumbai/typechain/factories/NFTCanvas__factory";
+//import { NFTCanvas as NFTCanvasMumbai } from "./contracts-generated-mumbai/typechain/NFTCanvas";
 
 // Polygon contract
 import { default as contractAddressPolygon } from "./contracts-generated-polygon/contract-address.json";
@@ -47,25 +47,34 @@ type TokenData = {
 }
 
 // Initialize Contract info depending on environment
-var contractAddress = contractAddressDev;
-var NFTCanvas__factory: typeof NFTCanvas__factoryDev | typeof NFTCanvas__factoryRinkeby | typeof NFTCanvas__factoryMainnet | typeof NFTCanvas__factoryMumbai | typeof NFTCanvas__factoryPolygon = NFTCanvas__factoryDev;
-type NFTCanvas = NFTCanvasDev | NFTCanvasRinkeby | NFTCanvasMainnet | NFTCanvasMumbai | NFTCanvasPolygon;
+var contractAddress = contractAddressPolygon;
+var NFTCanvas__factory: typeof NFTCanvas__factoryDev | typeof NFTCanvas__factoryPolygon = NFTCanvas__factoryPolygon;
+//var NFTCanvas__factory: typeof NFTCanvas__factoryDev | typeof NFTCanvas__factoryRinkeby | typeof NFTCanvas__factoryMainnet | typeof NFTCanvas__factoryMumbai | typeof NFTCanvas__factoryPolygon = NFTCanvas__factoryDev;
+type NFTCanvas = NFTCanvasDev | NFTCanvasPolygon;
+//type NFTCanvas = NFTCanvasDev | NFTCanvasRinkeby | NFTCanvasMainnet | NFTCanvasMumbai | NFTCanvasPolygon;
 
 const providerUrl = process.env.PROVIDER_URL ?? undefined;
 
 switch (process.env.NODE_ENV) {
+  case "development":
+    contractAddress = contractAddressDev;
+    NFTCanvas__factory = NFTCanvas__factoryDev;
+    break;
   case "production":
-    contractAddress = contractAddressMainnet;
-    NFTCanvas__factory = NFTCanvas__factoryMainnet;
-    break;
+    //contractAddress = contractAddressMainnet;
+    //NFTCanvas__factory = NFTCanvas__factoryMainnet;
+    //break;
+    throw new Error(`Uncomment above to support ${process.env.NODE_ENV}`);
   case "test":
-    contractAddress = contractAddressRinkeby;
-    NFTCanvas__factory = NFTCanvas__factoryRinkeby;
-    break;
+    //contractAddress = contractAddressRinkeby;
+    //NFTCanvas__factory = NFTCanvas__factoryRinkeby;
+    //break;
+    throw new Error(`Uncomment above to support ${process.env.NODE_ENV}`);
   case "mumbai":
-    contractAddress = contractAddressMumbai;
-    NFTCanvas__factory = NFTCanvas__factoryMumbai;
-    break;
+    //contractAddress = contractAddressMumbai;
+    //NFTCanvas__factory = NFTCanvas__factoryMumbai;
+    //break;
+    throw new Error(`Uncomment above to support ${process.env.NODE_ENV}`);
   case "polygon":
     contractAddress = contractAddressPolygon;
     NFTCanvas__factory = NFTCanvas__factoryPolygon;
@@ -467,8 +476,12 @@ class ProcessContractEvents {
       for (var i = 0; i < pinList.rows.length; i++) {
         const entry = pinList.rows[i];
         if (entry.ipfs_pin_hash != null && !validPins.has(entry.ipfs_pin_hash)) {
-          await this.pinata.unpin(entry.ipfs_pin_hash);
-          console.log(`Unpinned unused IPFS hash ${entry.ipfs_pin_hash} type: ${name}`);
+          try {
+            await this.pinata.unpin(entry.ipfs_pin_hash);
+            console.log(`Unpinned unused IPFS hash ${entry.ipfs_pin_hash} type: ${name}`);
+          } catch (error) {
+            console.log(`Error cleaning up unused pin by type ${type} and hash: ${entry.ipfs_pin_hash}: ${JSON.stringify(error)}`);
+          }
         }
       }
 
