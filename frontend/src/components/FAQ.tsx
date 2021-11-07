@@ -17,6 +17,7 @@ export default function FAQ() {
                 <li>Your area is minted as an NFT and lives on the Polygon blockchain forever!</li>
                 <li>Also, everything here is decentralized and enforced by a smart contract.</li>
             </ul>
+            <p>The minted NFTs are browsable / tradable at the OpenSea market <a href="https://opensea.io/collection/nft-canvas-2" target="_blank" rel="noopener noreferrer">here</a>.</p>
             <p>It's open source too. Check it out on <a href="https://github.com/tverona1/NFTCanvas" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
             </div>) },
         { id: "2", label: "How much is a pixel?", description: (<div><p>Prices start at 0.001 cents per pixel, so get in early! The minimum size that can be purchased is 10 x 10 pixels.</p><p><b>Price tiers:</b></p><p>0 - 250K pixels: $0.00001</p><p>250K - 500K pixels: $0.0001</p><p>500K - 1M pixels: $0.001</p><p>1M - 2M pixels: $0.01</p><p>2M - 4M pixels: $0.10</p><p>4M - 8M pixels: $1.00</p></div>) },
